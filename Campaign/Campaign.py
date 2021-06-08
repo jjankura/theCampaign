@@ -71,6 +71,7 @@ class MyGameView(arcade.View):
         self.player_sprite = arcade.Sprite(image_source, SPRITE_SCALING)
         self.player_sprite.center_x = 1075
         self.player_sprite.center_y = 255
+        self.player_sprite.collision_radius = 10
         self.player_sprite_list.append(self.player_sprite)
 
         wall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
@@ -81,76 +82,31 @@ class MyGameView(arcade.View):
         purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
         purpleSnake.center_x = 580
         purpleSnake.center_y = 350
+        purpleSnake.collision_radius = 10
         self.purple_snake_list.append(purpleSnake)
 
         purpleSnake = arcade.Sprite("images/PurpleSnake1.png", SPRITE_SCALING)
         purpleSnake.center_x = 350
         purpleSnake.center_y = 275
+        purpleSnake.collision_radius = 10
         self.purple_snake_list.append(purpleSnake)
 
         purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
         purpleSnake.center_x = 475
         purpleSnake.center_y = 500
+        purpleSnake.collision_radius = 10
         self.purple_snake_list.append(purpleSnake)
 
         purpleSnake = arcade.Sprite("images/PurpleSnake1.png", SPRITE_SCALING)
         purpleSnake.center_x = 600
         purpleSnake.center_y = 550
+        purpleSnake.collision_radius = 10
         self.purple_snake_list.append(purpleSnake)
 
         purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
         purpleSnake.center_x = 790
         purpleSnake.center_y = 425
-        self.purple_snake_list.append(purpleSnake)
-
-    def setupChallenge1(self):
-        # Sprite lists
-        self.player_sprite_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList()
-        self.purple_snake_list = arcade.SpriteList()
-        self.green_snake_list = arcade.SpriteList()
-
-        # Used to keep track of our scrolling
-        self.view_bottom = 0
-        self.view_left = 0
-
-        # Set up the player
-        image_source = "images/GreenSnake.png"
-
-        # self.player_sprite = Player()
-        self.player_sprite = arcade.Sprite(image_source, SPRITE_SCALING)
-        self.player_sprite.center_x = 1075
-        self.player_sprite.center_y = 255
-        self.player_sprite_list.append(self.player_sprite)
-
-        wall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
-        wall.center_x = 200
-        wall.center_y = 350
-        self.wall_list.append(wall)
-
-        purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-        purpleSnake.center_x = 580
-        purpleSnake.center_y = 350
-        self.purple_snake_list.append(purpleSnake)
-
-        purpleSnake = arcade.Sprite("images/PurpleSnake1.png", SPRITE_SCALING)
-        purpleSnake.center_x = 350
-        purpleSnake.center_y = 275
-        self.purple_snake_list.append(purpleSnake)
-
-        purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-        purpleSnake.center_x = 475
-        purpleSnake.center_y = 500
-        self.purple_snake_list.append(purpleSnake)
-
-        purpleSnake = arcade.Sprite("images/PurpleSnake1.png", SPRITE_SCALING)
-        purpleSnake.center_x = 600
-        purpleSnake.center_y = 550
-        self.purple_snake_list.append(purpleSnake)
-
-        purpleSnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-        purpleSnake.center_x = 790
-        purpleSnake.center_y = 425
+        purpleSnake.collision_radius = 10
         self.purple_snake_list.append(purpleSnake)
 
     def on_draw(self):
