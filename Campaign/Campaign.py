@@ -143,9 +143,9 @@ class MyGameView(arcade.View):
         arcade.draw_text(output, 1030, -50, arcade.color.WHITE, 25)
 
         # Draw all the sprites.
+        self.wall_list.draw()
         self.player_sprite_list.draw()
         self.viper_sprite_list.draw()
-        self.wall_list.draw()
         self.purple_snake_list.draw()
         self.green_snake_list.draw()
 
