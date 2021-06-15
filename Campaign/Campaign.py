@@ -1,6 +1,7 @@
 import random
 import arcade
 
+
 SPRITE_SCALING = 1.5
 SPRITE_SCALING_BOX = 0.175
 
@@ -23,7 +24,7 @@ GREEN_POP = 15
 # ----------------------------------------------------------------------------------------------
 
 
-class MyGameView(arcade.View):
+class GameView(arcade.View):
     """
     Main application class.
     """
@@ -46,10 +47,13 @@ class MyGameView(arcade.View):
         # Set up the player info
         self.player_sprite = None
         self.viper_sprite = None
+        self.psnake = None
 
         # Sets score to 0
         self.pscore = 0
         self.gscore = 0
+        self.viper_pscore = 0
+        self.viper_gscore = 0
 
         # Used to keep track of our scrolling
         self.view_bottom = 0
@@ -57,6 +61,11 @@ class MyGameView(arcade.View):
 
         # Set the background color
         arcade.set_background_color(arcade.color.DODGER_BLUE)
+
+        self.left_boundary = None
+        self.right_boundary = None
+        self.top_boundary = None
+        self.bottom_boundary = None
 
         self.background = None
 
@@ -83,7 +92,6 @@ class MyGameView(arcade.View):
         self.player_sprite = arcade.Sprite(image_source, SPRITE_SCALING)
         self.player_sprite.center_x = 1075
         self.player_sprite.center_y = 255
-        self.player_sprite.collision_radius = 10
         self.player_sprite_list.append(self.player_sprite)
 
         wall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
@@ -91,21 +99,18 @@ class MyGameView(arcade.View):
         wall.center_y = 350
         self.wall_list.append(wall)
 
-        viper = arcade.Sprite("images/Viper.png", SPRITE_SCALING)
-        viper.center_x = 360
-        viper.center_y = 270
-        self.viper_sprite_list.append(viper)
+        self.viper_sprite = arcade.Sprite("images/Viper.png", SPRITE_SCALING)
+        self.viper_sprite.center_x = 360
+        self.viper_sprite.center_y = 270
+        self.viper_sprite_list.append(self.viper_sprite)
 
         for i in range(PURPLE_POP):
-
-            psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-
+            self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
             # Position the snake
-            psnake.center_x = random.randrange(110, 820)
-            psnake.center_y = random.randrange(120, 710)
-
+            self.psnake.center_x = random.randrange(110, 820)
+            self.psnake.center_y = random.randrange(120, 710)
             # Add the snake to the lists
-            self.purple_snake_list.append(psnake)
+            self.purple_snake_list.append(self.psnake)
 
         for i in range(GREEN_POP):
             gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
@@ -127,27 +132,13 @@ class MyGameView(arcade.View):
 
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
 
-        arcade.draw_rectangle_filled(900, 25, 250, 60, arcade.csscolor.BLACK)
-        # Put the text on the screen.
-        output = f"Purple Votes: {self.pscore}"
-        arcade.draw_text(output, 785, 10, arcade.color.MEDIUM_PURPLE, 25)
-
-        arcade.draw_rectangle_filled(900, -35, 250, 60, arcade.csscolor.BLACK)
-        # Put the text on the screen.
-        output = f"Green Votes: {self.gscore}"
-        arcade.draw_text(output, 785, -50, arcade.color.GREEN, 25)
-
-        arcade.draw_rectangle_filled(1150, -35, 250, 60, arcade.csscolor.BLACK)
-        # Put the text on the screen.
-        output = f"Total Votes: {self.pscore + self.gscore}"
-        arcade.draw_text(output, 1030, -50, arcade.color.WHITE, 25)
-
         # Draw all the sprites.
         self.wall_list.draw()
         self.player_sprite_list.draw()
         self.viper_sprite_list.draw()
         self.purple_snake_list.draw()
         self.green_snake_list.draw()
+        self.scoreboard()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -156,41 +147,55 @@ class MyGameView(arcade.View):
         self.purple_snake_list.update()
         self.green_snake_list.update()
 
+        self.follow_viper()
+
         # Collision with purple snakes
         purple_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.purple_snake_list)
         for psnake in purple_snake_hit_list:
             psnake.remove_from_sprite_lists()
             self.pscore += 1
-
+        # Collision with green snakes
         green_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.green_snake_list)
         for gsnake in green_snake_hit_list:
             gsnake.remove_from_sprite_lists()
             self.gscore += 1
 
+        # Viper collision with purple snakes
+        purple_snake_hit_list = arcade.check_for_collision_with_list(self.viper_sprite, self.purple_snake_list)
+        for psnake in purple_snake_hit_list:
+            psnake.remove_from_sprite_lists()
+            self.viper_pscore += 1
+        # Viper collision with green snakes
+        green_snake_hit_list = arcade.check_for_collision_with_list(self.viper_sprite, self.green_snake_list)
+        for gsnake in green_snake_hit_list:
+            gsnake.remove_from_sprite_lists()
+            self.viper_gscore += 1
+
         changed = False
 
         # Scroll left
-        left_boundary = self.view_left + LEFT_VIEWPORT_MARGIN
-        if self.player_sprite.left < left_boundary:
-            self.view_left -= left_boundary - self.player_sprite.left
+        self.left_boundary = self.view_left + LEFT_VIEWPORT_MARGIN
+        if self.player_sprite.left < self.left_boundary:
+            self.view_left -= self.left_boundary - self.player_sprite.left
+            self.scoreboard()
             changed = True
 
         # Scroll right
-        right_boundary = self.view_left + SCREEN_WIDTH - RIGHT_VIEWPORT_MARGIN
-        if self.player_sprite.right > right_boundary:
-            self.view_left += self.player_sprite.right - right_boundary
+        self.right_boundary = self.view_left + SCREEN_WIDTH - RIGHT_VIEWPORT_MARGIN
+        if self.player_sprite.right > self.right_boundary:
+            self.view_left += self.player_sprite.right - self.right_boundary
             changed = True
 
         # Scroll up
-        top_boundary = self.view_bottom + SCREEN_HEIGHT - TOP_VIEWPORT_MARGIN
-        if self.player_sprite.top > top_boundary:
-            self.view_bottom += self.player_sprite.top - top_boundary
+        self.top_boundary = self.view_bottom + SCREEN_HEIGHT - TOP_VIEWPORT_MARGIN
+        if self.player_sprite.top > self.top_boundary:
+            self.view_bottom += self.player_sprite.top - self.top_boundary
             changed = True
 
         # Scroll down
-        bottom_boundary = self.view_bottom + BOTTOM_VIEWPORT_MARGIN
-        if self.player_sprite.bottom < bottom_boundary:
-            self.view_bottom -= bottom_boundary - self.player_sprite.bottom
+        self.bottom_boundary = self.view_bottom + BOTTOM_VIEWPORT_MARGIN
+        if self.player_sprite.bottom < self.bottom_boundary:
+            self.view_bottom -= self.bottom_boundary - self.player_sprite.bottom
             changed = True
 
         if changed:
@@ -205,6 +210,64 @@ class MyGameView(arcade.View):
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
 
+            # End game when all the gscore and pscore == 45
+            if self.pscore + self.gscore == 23:
+                view = GameOverView()
+                self.window.show_view(view)
+        self.scoreboard()
+
+    def follow_viper(self):
+
+        if self.psnake.center_y < self.viper_sprite.center_y:
+            self.psnake.center_y += min(PURPLE_SPEED, self.viper_sprite.center_y - self.psnake.center_y)
+        elif self.psnake.center_y > self.viper_sprite.center_y:
+            self.psnake.center_y -= min(PURPLE_SPEED, self.psnake.center_y - self.viper_sprite.center_y)
+
+        if self.psnake.center_x < self.viper_sprite.center_x:
+            self.psnake.center_x += min(PURPLE_SPEED, self.viper_sprite.center_x - self.psnake.center_x)
+        elif self.psnake.center_x > self.viper_sprite.center_x:
+            self.psnake.center_x -= min(PURPLE_SPEED, self.psnake.center_x - self.viper_sprite.center_x)
+
+    def scoreboard(self):
+
+        # Sssam scoreboard
+        arcade.draw_rectangle_filled(self.right_boundary + 420, self.bottom_boundary - 360, 500, 120, arcade.csscolor.BLACK)
+
+        # Draw pscore scoreboard
+        output = f"Purple Votes: {self.pscore}"
+        arcade.draw_text(output, self.right_boundary + 200, self.bottom_boundary - 405, arcade.color.MEDIUM_PURPLE, 25)
+
+        # Draw gscore scoreboard
+        output = f"Green Votes: {self.gscore}"
+        arcade.draw_text(output, self.right_boundary + 200, self.bottom_boundary - 350, arcade.color.GREEN, 25)
+
+        # Draw total scoreboard
+        output = f"Total Votes: {self.pscore + self.gscore}"
+        arcade.draw_text(output, self.right_boundary + 500, self.bottom_boundary - 405, arcade.color.WHITE, 25)
+
+        arcade.draw_rectangle_filled(self.right_boundary + 428, self.bottom_boundary - 275, 110, 50, arcade.csscolor.GREEN)
+        output = "Sssam"
+        arcade.draw_text(output, self.right_boundary + 380, self.bottom_boundary - 290, arcade.color.WHITE, 25)
+
+        # Viper scoreboard
+        arcade.draw_rectangle_filled(self.right_boundary - 375, self.bottom_boundary - 360, 500, 120, arcade.csscolor.BLACK)
+
+        # Draw pscore scoreboard
+        output = f"Purple Votes: {self.viper_pscore}"
+        arcade.draw_text(output, self.right_boundary - 595, self.bottom_boundary - 405, arcade.color.MEDIUM_PURPLE, 25)
+
+        # Draw gscore scoreboard
+        output = f"Green Votes: {self.viper_gscore}"
+        arcade.draw_text(output, self.right_boundary - 595, self.bottom_boundary - 350, arcade.color.GREEN, 25)
+
+        # Draw total scoreboard
+        output = f"Total Votes: {self.viper_pscore + self.viper_gscore}"
+        arcade.draw_text(output, self.right_boundary - 345, self.bottom_boundary - 405, arcade.color.WHITE, 25)
+
+        arcade.draw_rectangle_filled(self.right_boundary - 380, self.bottom_boundary - 275, 100, 50, arcade.csscolor.MEDIUM_PURPLE)
+        output = "Viper"
+        arcade.draw_text(output, self.right_boundary - 415, self.bottom_boundary - 290, arcade.color.WHITE, 25)
+
     def on_key_press(self, key, modifiers):
         """ Called whenever a key is pressed. """
 
@@ -212,7 +275,6 @@ class MyGameView(arcade.View):
             self.player_sprite.change_y = MOVEMENT_SPEED
         elif key == arcade.key.DOWN:
             self.player_sprite.change_y = -MOVEMENT_SPEED
-
         elif key == arcade.key.LEFT:
             self.player_sprite.change_x = -MOVEMENT_SPEED
         elif key == arcade.key.RIGHT:
@@ -229,7 +291,7 @@ class MyGameView(arcade.View):
 # ----------------------------------------------------------------------------------------------
 
 
-class Title(arcade.View):
+class TitleView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
@@ -257,13 +319,13 @@ class Title(arcade.View):
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
-        instruct = Instructions()
+        instruct = InstructionView()
         self.window.show_view(instruct)
 
 # ----------------------------------------------------------------------------------------------
 
 
-class Instructions(arcade.View):
+class InstructionView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
@@ -282,16 +344,38 @@ class Instructions(arcade.View):
                          SCREEN_HEIGHT / 2 - 105, arcade.color.WHITE, font_size=20, anchor_x='left')
         arcade.draw_text("~ Your job is to gain the majority of votes before all the votes are cast", 300,
                          SCREEN_HEIGHT / 2 - 135, arcade.color.WHITE, font_size=20, anchor_x='left')
+        arcade.draw_text("~ Use your keyboard arrows to move Sssam", 300,
+                         SCREEN_HEIGHT / 2 - 165, arcade.color.WHITE, font_size=20, anchor_x='left')
         arcade.draw_text("~ Good luck!",
-                         300, SCREEN_HEIGHT / 2 - 165, arcade.color.WHITE, font_size=20, anchor_x='left')
+                         300, SCREEN_HEIGHT / 2 - 195, arcade.color.WHITE, font_size=20, anchor_x='left')
         arcade.draw_text('Click to advance', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 250, arcade.color.WHITE,
                          font_size=20, anchor_x='center')
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
-        game_view = MyGameView()
+        game_view = GameView()
         game_view.setupIsland()
         self.window.show_view(game_view)
+
+
+# ----------------------------------------------------------------------------------------------
+
+class GameOverView(arcade.View):
+
+    def on_show(self):
+        """Runs once we switch to this view"""
+        arcade.set_background_color(arcade.csscolor.SEA_GREEN)
+        # Reset viewpoint back to 0,0
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+        """Draw this view"""
+        arcade.start_render()
+        arcade.draw_text("Game Over!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+                         arcade.color.WHITE, font_size=50, anchor_x='center')
+
+    def on_mouse_press(self, _x, _y, button, _modifiers):
+        """If the user presses the mouse button, start the game"""
 
 
 # ----------------------------------------------------------------------------------------------
@@ -300,7 +384,7 @@ class Instructions(arcade.View):
 def main():
     """ Main method """
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    start_view = Title()
+    start_view = TitleView()
     window.show_view(start_view)
     arcade.run()
 
