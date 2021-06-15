@@ -10,7 +10,7 @@ SCREEN_HEIGHT = 800
 SCREEN_TITLE = "The Campaign"
 
 MOVEMENT_SPEED = 3
-PURPLE_SPEED = 0.5
+PURPLE_SPEED = 0.3
 
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH / 2
 RIGHT_VIEWPORT_MARGIN = SCREEN_WIDTH / 2
@@ -147,7 +147,10 @@ class GameView(arcade.View):
         self.purple_snake_list.update()
         self.green_snake_list.update()
 
-        self.follow_viper()
+        for self.psnake in self.purple_snake_list:
+            self.follow_viper(self.psnake)
+
+        # self.follow_viper()
 
         # Collision with purple snakes
         purple_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.purple_snake_list)
@@ -212,21 +215,25 @@ class GameView(arcade.View):
 
             # End game when all the gscore and pscore == 45
             if self.pscore + self.gscore == 23:
-                view = GameOverView()
+                view = GameOverWinView()
                 self.window.show_view(view)
+            elif self.viper_pscore + self.viper_gscore == 23:
+                view = GameOverLoseView()
+                self.window.show_view(view)
+
         self.scoreboard()
 
-    def follow_viper(self):
+    def follow_viper(self, psnake):
 
-        if self.psnake.center_y < self.viper_sprite.center_y:
-            self.psnake.center_y += min(PURPLE_SPEED, self.viper_sprite.center_y - self.psnake.center_y)
-        elif self.psnake.center_y > self.viper_sprite.center_y:
-            self.psnake.center_y -= min(PURPLE_SPEED, self.psnake.center_y - self.viper_sprite.center_y)
+        if psnake.center_y < self.viper_sprite.center_y:
+            psnake.center_y += min(PURPLE_SPEED, self.viper_sprite.center_y - psnake.center_y)
+        elif psnake.center_y > self.viper_sprite.center_y:
+            psnake.center_y -= min(PURPLE_SPEED, psnake.center_y - self.viper_sprite.center_y)
 
-        if self.psnake.center_x < self.viper_sprite.center_x:
-            self.psnake.center_x += min(PURPLE_SPEED, self.viper_sprite.center_x - self.psnake.center_x)
-        elif self.psnake.center_x > self.viper_sprite.center_x:
-            self.psnake.center_x -= min(PURPLE_SPEED, self.psnake.center_x - self.viper_sprite.center_x)
+        if psnake.center_x < self.viper_sprite.center_x:
+            psnake.center_x += min(PURPLE_SPEED, self.viper_sprite.center_x - psnake.center_x)
+        elif psnake.center_x > self.viper_sprite.center_x:
+            psnake.center_x -= min(PURPLE_SPEED, psnake.center_x - self.viper_sprite.center_x)
 
     def scoreboard(self):
 
@@ -243,7 +250,7 @@ class GameView(arcade.View):
 
         # Draw total scoreboard
         output = f"Total Votes: {self.pscore + self.gscore}"
-        arcade.draw_text(output, self.right_boundary + 500, self.bottom_boundary - 405, arcade.color.WHITE, 25)
+        arcade.draw_text(output, self.right_boundary + 450, self.bottom_boundary - 405, arcade.color.WHITE, 25)
 
         arcade.draw_rectangle_filled(self.right_boundary + 428, self.bottom_boundary - 275, 110, 50, arcade.csscolor.GREEN)
         output = "Sssam"
@@ -360,7 +367,7 @@ class InstructionView(arcade.View):
 
 # ----------------------------------------------------------------------------------------------
 
-class GameOverView(arcade.View):
+class GameOverWinView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
@@ -371,12 +378,31 @@ class GameOverView(arcade.View):
     def on_draw(self):
         """Draw this view"""
         arcade.start_render()
-        arcade.draw_text("Game Over!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+        arcade.draw_text("Game Over! Winner!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
                          arcade.color.WHITE, font_size=50, anchor_x='center')
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
 
+# ----------------------------------------------------------------------------------------------
+
+
+class GameOverLoseView(arcade.View):
+
+    def on_show(self):
+        """Runs once we switch to this view"""
+        arcade.set_background_color(arcade.csscolor.SEA_GREEN)
+        # Reset viewpoint back to 0,0
+        arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
+
+    def on_draw(self):
+        """Draw this view"""
+        arcade.start_render()
+        arcade.draw_text("Game Over! Loser", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+                         arcade.color.WHITE, font_size=50, anchor_x='center')
+
+    def on_mouse_press(self, _x, _y, button, _modifiers):
+        """If the user presses the mouse button, start the game"""
 
 # ----------------------------------------------------------------------------------------------
 
@@ -389,7 +415,6 @@ def main():
     arcade.run()
 
 # ----------------------------------------------------------------------------------------------
-# Program Script
 
 
 if __name__ == "__main__":
