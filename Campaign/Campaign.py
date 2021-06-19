@@ -75,6 +75,8 @@ class GameView(arcade.View):
 
         self.viper_destination = None
 
+        self.path = None
+
     def setupIsland(self):
         """ Set up the game and initialize the variables. """
 
@@ -93,7 +95,7 @@ class GameView(arcade.View):
         self.view_left = 0
 
         # self.player_sprite = Player()
-        self.player_sprite = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
+        self.player_sprite = arcade.Sprite("images/Sssam.png", SPRITE_SCALING)
         self.player_sprite.center_x = 1120
         self.player_sprite.center_y = 255
         self.player_sprite_list.append(self.player_sprite)
@@ -133,7 +135,7 @@ class GameView(arcade.View):
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
-        self.house.center_y = 400
+        self.house.center_y = 420
         self.house_list.append(self.house)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
@@ -143,7 +145,7 @@ class GameView(arcade.View):
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
-        self.house.center_y = 640
+        self.house.center_y = 660
         self.house_list.append(self.house)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
@@ -158,7 +160,7 @@ class GameView(arcade.View):
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 655
-        self.house.center_y = 400
+        self.house.center_y = 420
         self.house_list.append(self.house)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
@@ -168,7 +170,7 @@ class GameView(arcade.View):
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 655
-        self.house.center_y = 640
+        self.house.center_y = 660
         self.house_list.append(self.house)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
@@ -188,7 +190,7 @@ class GameView(arcade.View):
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 1060
-        self.house.center_y = 285
+        self.house.center_y = 660
         self.house_list.append(self.house)
 
     def on_draw(self):
@@ -250,8 +252,8 @@ class GameView(arcade.View):
         # Check if Sssam hits house
         house_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.house_list)
         if len(house_hit_list) > 0:
-            self.player_sprite.change_x = 0
-            self.player_sprite.change_y = 0
+            self.player_sprite.change_x *= -1
+            self.player_sprite.change_y *= -1
 
         # Check if Viper hits house
         viper_house_hit_list = arcade.check_for_collision_with_list(self.viper_sprite, self.house_list)
@@ -259,10 +261,12 @@ class GameView(arcade.View):
             self.viper_sprite.change_x *= -1
             self.viper_sprite.change_y *= -1
 
-        # Check if Viper hits house
-        gsnake_house_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.house_list)
-        if len(gsnake_house_hit_list) > 0:
-            self.green_snake_list.center_x += 100
+        # Check if psnake hits house
+        """for self.psnake in self.purple_snake_list:
+            psnake_house_hit_list = arcade.check_for_collision_with_list(self.psnake, self.house_list)
+            if len(psnake_house_hit_list) > 0:
+                self.psnake.change_x *= -1
+                self.psnake.change_y *= -1"""
 
         # Call follow_viper() for all of the psnakes in the purple_snake_list
         for self.psnake in self.purple_snake_list:
@@ -421,6 +425,10 @@ class GameView(arcade.View):
 
 class TitleView(arcade.View):
 
+    def __init__(self):
+        super().__init__()
+        self.texture = arcade.load_texture("images/TITLE.png")
+
     def on_show(self):
         """Runs once we switch to this view"""
         arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
@@ -429,8 +437,12 @@ class TitleView(arcade.View):
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
-        arcade.draw_text("Welcome to the Island of Python", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+
+        self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
+
+        """arcade.draw_text("Welcome to the Island of Python", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
                          arcade.color.WHITE, font_size=50, anchor_x='center')
         arcade.draw_text("~ We're having an election for mayor!", 300, SCREEN_HEIGHT / 2-75, arcade.color.WHITE,
                          font_size=20, anchor_x='left')
@@ -443,7 +455,7 @@ class TitleView(arcade.View):
         arcade.draw_text("~ After all, purple snakes run the Island...", 300, SCREEN_HEIGHT / 2-195, arcade.color.WHITE,
                          font_size=20, anchor_x='left')
         arcade.draw_text('Click to advance', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-250, arcade.color.WHITE, font_size=20,
-                         anchor_x='center')
+                         anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
@@ -455,6 +467,10 @@ class TitleView(arcade.View):
 
 class InstructionView(arcade.View):
 
+    def __init__(self):
+        super().__init__()
+        self.texture = arcade.load_texture("images/INSTRUCTIONS.png")
+
     def on_show(self):
         """Runs once we switch to this view"""
         arcade.set_background_color(arcade.csscolor.SEA_GREEN)
@@ -464,7 +480,8 @@ class InstructionView(arcade.View):
     def on_draw(self):
         """Draw this view"""
         arcade.start_render()
-        arcade.draw_text("INSTRUCTIONS", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+        self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
+        """arcade.draw_text("INSTRUCTIONS", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
                          arcade.color.WHITE, font_size=50, anchor_x='center')
         arcade.draw_text("~ You will be competing to wins votes against the incumbent, Viper  ", 300,
                          SCREEN_HEIGHT / 2 - 75, arcade.color.WHITE, font_size=20, anchor_x='left')
@@ -477,7 +494,7 @@ class InstructionView(arcade.View):
         arcade.draw_text("~ Good luck!",
                          300, SCREEN_HEIGHT / 2 - 195, arcade.color.WHITE, font_size=20, anchor_x='left')
         arcade.draw_text('Click to Start the Election', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 250, arcade.color.WHITE,
-                         font_size=20, anchor_x='center')
+                         font_size=20, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
