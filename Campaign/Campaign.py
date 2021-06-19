@@ -10,7 +10,7 @@ SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 800
 SCREEN_TITLE = "The Campaign"
 
-MOVEMENT_SPEED = 3
+MOVEMENT_SPEED = 2
 PURPLE_SPEED = 0.3
 
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH / 2
@@ -49,6 +49,7 @@ class GameView(arcade.View):
         self.player_sprite = None
         self.viper_sprite = None
         self.psnake = None
+        self.gsnake = None
         self.cityHall = None
         self.house = None
 
@@ -93,25 +94,21 @@ class GameView(arcade.View):
 
         # self.player_sprite = Player()
         self.player_sprite = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
-        self.player_sprite.center_x = 1075
+        self.player_sprite.center_x = 1120
         self.player_sprite.center_y = 255
-        self.player_sprite._hit_box_algorithm = "detailed"
         self.player_sprite_list.append(self.player_sprite)
 
         self.viper_sprite = arcade.Sprite("images/Viper.png", SPRITE_SCALING)
         self.viper_sprite.center_x = 360
         self.viper_sprite.center_y = 270
-        self.viper_sprite.change_x = random.random()  # (-1, 1)
-        self.viper_sprite.change_y = random.random()  # (-1, 1)
-        """self.viper_sprite.center_x += self.viper_sprite.change_x
-        self.viper_sprite.center_y += self.viper_sprite.change_y"""
+        self.viper_sprite.change_x = random.random()
+        self.viper_sprite.change_y = random.random()
         self.viper_sprite_list.append(self.viper_sprite)
 
         self.cityHall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
         self.cityHall.center_x = 335
         self.cityHall.center_y = 350
-        self.cityHall._hit_box_algorithm = "detailed"
-        self.wall_list.append(self.cityHall)
+        self.house_list.append(self.cityHall)
 
         for i in range(PURPLE_POP):
             self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
@@ -122,12 +119,12 @@ class GameView(arcade.View):
             self.purple_snake_list.append(self.psnake)
 
         for i in range(GREEN_POP):
-            gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
+            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
             # Position the snake
-            gsnake.center_x = random.randrange(830, 1180)
-            gsnake.center_y = random.randrange(120, 710)
+            self.gsnake.center_x = random.randrange(830, 1150)
+            self.gsnake.center_y = random.randrange(120, 710)
             # Add the snake to the lists
-            self.green_snake_list.append(gsnake)
+            self.green_snake_list.append(self.gsnake)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
@@ -189,10 +186,10 @@ class GameView(arcade.View):
         self.house.center_y = 400
         self.house_list.append(self.house)
 
-        """self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
+        self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 1060
         self.house.center_y = 285
-        self.house_list.append(self.house)"""
+        self.house_list.append(self.house)
 
     def on_draw(self):
         """
@@ -234,19 +231,50 @@ class GameView(arcade.View):
         if self.viper_sprite.bottom < 110:
             self.viper_sprite.change_y *= -1
 
-        if self.viper_sprite.top > 750:
+        if self.viper_sprite.top > 735:
             self.viper_sprite.change_y *= -1
+
+        # If Sssam out-of-bounds, stop
+        if self.player_sprite.left < 100:
+            self.player_sprite.change_x = 0
+
+        if self.player_sprite.right > 1150:
+            self.player_sprite.change_x = 0
+
+        if self.player_sprite.bottom < 110:
+            self.player_sprite.change_y = 0
+
+        if self.player_sprite.top > 735:
+            self.player_sprite.change_y = 0
+
+        # Check if Sssam hits house
+        house_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.house_list)
+        if len(house_hit_list) > 0:
+            self.player_sprite.change_x = 0
+            self.player_sprite.change_y = 0
+
+        # Check if Viper hits house
+        viper_house_hit_list = arcade.check_for_collision_with_list(self.viper_sprite, self.house_list)
+        if len(viper_house_hit_list) > 0:
+            self.viper_sprite.change_x *= -1
+            self.viper_sprite.change_y *= -1
+
+        # Check if Viper hits house
+        gsnake_house_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.house_list)
+        if len(gsnake_house_hit_list) > 0:
+            self.green_snake_list.center_x += 100
 
         # Call follow_viper() for all of the psnakes in the purple_snake_list
         for self.psnake in self.purple_snake_list:
             self.follow_viper(self.psnake)
 
-        # Collision with purple snakes
+        # Sssam collision with purple snakes
         purple_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.purple_snake_list)
         for psnake in purple_snake_hit_list:
             psnake.remove_from_sprite_lists()
             self.pscore += 1
-        # Collision with green snakes
+
+        # Sssam collision with green snakes
         green_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.green_snake_list)
         for gsnake in green_snake_hit_list:
             gsnake.remove_from_sprite_lists()
@@ -257,17 +285,12 @@ class GameView(arcade.View):
         for psnake in purple_snake_hit_list:
             psnake.remove_from_sprite_lists()
             self.viper_pscore += 1
+
         # Viper collision with green snakes
         green_snake_hit_list = arcade.check_for_collision_with_list(self.viper_sprite, self.green_snake_list)
         for gsnake in green_snake_hit_list:
             gsnake.remove_from_sprite_lists()
             self.viper_gscore += 1
-
-        """# Check if Sssam hits house
-        house_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.house_list)
-
-        for Sssam in house_hit_list:
-            Sssam.remove_from_sprite_lists()"""
 
         changed = False
 
@@ -307,11 +330,11 @@ class GameView(arcade.View):
                                 self.view_bottom,
                                 SCREEN_HEIGHT + self.view_bottom)
 
-        # End game when all the gscore and pscore == 45
+        # End game when either Sssam or Viper get a majority of 23
         if self.pscore + self.gscore == 23:
             view = GameOverWinView()
             self.window.show_view(view)
-        elif self.viper_pscore + self.viper_gscore == 23:
+        if self.viper_pscore + self.viper_gscore == 23:
             view = GameOverLoseView()
             self.window.show_view(view)
 
