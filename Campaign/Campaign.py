@@ -120,11 +120,19 @@ class GameView(arcade.View):
             # Add the snake to the lists
             self.purple_snake_list.append(self.psnake)
 
-        for i in range(GREEN_POP):
+        for i in range(GREEN_POP - 5):
             self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
             # Position the snake
-            self.gsnake.center_x = random.randrange(830, 1150)
-            self.gsnake.center_y = random.randrange(120, 710)
+            self.gsnake.center_x = random.randrange(830, 1000)
+            self.gsnake.center_y = random.randrange(300, 710)
+            # Add the snake to the lists
+            self.green_snake_list.append(self.gsnake)
+
+        for i in range(GREEN_POP - 10):
+            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
+            # Position the snake
+            self.gsnake.center_x = random.randrange(830, 1000)
+            self.gsnake.center_y = random.randrange(120, 300)
             # Add the snake to the lists
             self.green_snake_list.append(self.gsnake)
 
@@ -507,6 +515,10 @@ class InstructionView(arcade.View):
 
 class GameOverWinView(arcade.View):
 
+    def __init__(self):
+        super().__init__()
+        self.texture = arcade.load_texture("images/WINNER.png")
+
     def on_show(self):
         """Runs once we switch to this view"""
         arcade.set_background_color(arcade.csscolor.GREEN)
@@ -516,10 +528,11 @@ class GameOverWinView(arcade.View):
     def on_draw(self):
         """Draw this view"""
         arcade.start_render()
-        arcade.draw_text("Game Over! You've Won the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+        self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
+        """arcade.draw_text("Game Over! You've Won the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
                          arcade.color.WHITE, font_size=50, anchor_x='center')
         arcade.draw_text("You received at least 23 votes!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 105,
-                         arcade.color.WHITE, font_size=40, anchor_x='center')
+                         arcade.color.WHITE, font_size=40, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
@@ -528,6 +541,10 @@ class GameOverWinView(arcade.View):
 
 
 class GameOverLoseView(arcade.View):
+
+    def __init__(self):
+        super().__init__()
+        self.texture = arcade.load_texture("images/LOSER.png")
 
     def on_show(self):
         """Runs once we switch to this view"""
@@ -538,10 +555,11 @@ class GameOverLoseView(arcade.View):
     def on_draw(self):
         """Draw this view"""
         arcade.start_render()
-        arcade.draw_text("Game Over! You've Lost the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
+        self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
+        """arcade.draw_text("Game Over! You've Lost the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
                          arcade.color.WHITE, font_size=50, anchor_x='center')
         arcade.draw_text("Viper won the election with 23 votes", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 105,
-                         arcade.color.WHITE, font_size=40, anchor_x='center')
+                         arcade.color.WHITE, font_size=40, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
