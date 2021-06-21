@@ -1,7 +1,6 @@
 import random
 import arcade
 
-
 SPRITE_SCALING = 1.5
 SPRITE_SCALING_BOX = 0.175
 HOUSE_SCALE = 0.12
@@ -59,28 +58,27 @@ class GameIntro(arcade.View):
         self.viper_pscore = 0
         self.viper_gscore = 0
 
-        # Used to keep track of our scrolling
+        # Used to keep track of scrolling
         self.view_bottom = 0
         self.view_left = 0
 
         # Set the background color
         arcade.set_background_color(arcade.color.DODGER_BLUE)
 
+        # Keep track of boundary
         self.left_boundary = 0
         self.right_boundary = 0
         self.top_boundary = 0
         self.bottom_boundary = 0
 
+        # Keep track of background
         self.background = None
-
-        self.viper_destination = None
-
-        self.path = None
 
 # ----------------------------------------------------------------------------------------------------------------------
     def setupIsland(self):
         """ Set up the game and initialize the variables. """
 
+        # Load background
         self.background = arcade.load_texture("images/campaign.png")
 
         # Sprite lists
@@ -95,46 +93,25 @@ class GameIntro(arcade.View):
         self.view_bottom = 0
         self.view_left = 0
 
-        # self.player_sprite = Player()
+        # Set up Sssam
         self.player_sprite = arcade.Sprite("images/Sssam.png", SPRITE_SCALING)
         self.player_sprite.center_x = 1120
         self.player_sprite.center_y = 255
         self.player_sprite_list.append(self.player_sprite)
 
+        # Set up Viper
         self.viper_sprite = arcade.Sprite("images/Viper.png", SPRITE_SCALING)
         self.viper_sprite.center_x = 360
         self.viper_sprite.center_y = 270
         self.viper_sprite_list.append(self.viper_sprite)
 
+        # Set up City Hall
         self.cityHall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
         self.cityHall.center_x = 335
         self.cityHall.center_y = 350
         self.house_list.append(self.cityHall)
 
-        for i in range(10):
-            self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.psnake.center_x = random.randrange(110, 820)
-            self.psnake.center_y = random.randrange(120, 710)
-            # Add the snake to the lists
-            self.purple_snake_list.append(self.psnake)
-
-        for i in range(5):
-            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.gsnake.center_x = random.randrange(830, 1000)
-            self.gsnake.center_y = random.randrange(300, 710)
-            # Add the snake to the lists
-            self.green_snake_list.append(self.gsnake)
-
-        for i in range(GREEN_POP - 10):
-            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.gsnake.center_x = random.randrange(830, 1000)
-            self.gsnake.center_y = random.randrange(120, 300)
-            # Add the snake to the lists
-            self.green_snake_list.append(self.gsnake)
-
+        # Spawn house
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
         self.house.center_y = 300
@@ -200,6 +177,59 @@ class GameIntro(arcade.View):
         self.house.center_y = 660
         self.house_list.append(self.house)
 
+        # Place Green Snakes
+        for i in range(5):
+            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
+            # Boolean variable if we successfully placed the gsnake
+            gsnake_placed_successfully = False
+
+            # Keep trying until success
+            while not gsnake_placed_successfully:
+                # Position the gsnake
+                self.gsnake.center_x = random.randrange(830, 1150)
+                self.gsnake.center_y = random.randrange(120, 710)
+
+                # See if the gsnake is hitting a house
+                wall_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.house_list)
+
+                # See if the gsnake is hitting another gsnake
+                gsnake_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.green_snake_list)
+
+                if len(wall_hit_list) == 0 and len(gsnake_hit_list) == 0:
+                    gsnake_placed_successfully = True
+
+            # Add the gsnake to the lists
+            self.green_snake_list.append(self.gsnake)
+
+        # Place purple snakes
+        for i in range(10):
+            self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
+            # Boolean variable if we successfully placed the psnake
+            psnake_placed_successfully = False
+
+            # Keep trying until success
+            while not psnake_placed_successfully:
+                # Position the psnake
+                self.psnake.center_x = random.randrange(100, 750)
+                self.psnake.center_y = random.randrange(120, 710)
+
+                # See if the psnake is hitting Viper
+                viper_hit_list = arcade.check_for_collision_with_list(self.psnake, self.viper_sprite_list)
+
+                # See if the psnake is hitting a house
+                wall_hit_list = arcade.check_for_collision_with_list(self.psnake, self.house_list)
+
+                # See if the psnake is hitting another psnake
+                psnake_hit_list = arcade.check_for_collision_with_list(self.psnake, self.purple_snake_list)
+
+                if len(wall_hit_list) == 0:
+                    if len(psnake_hit_list) == 0:
+                        if len(viper_hit_list) == 0:
+                            psnake_placed_successfully = True
+
+            # Add the psnake to the lists
+            self.purple_snake_list.append(self.psnake)
+
     def on_draw(self):
         """
         Render the screen.
@@ -208,15 +238,16 @@ class GameIntro(arcade.View):
         # This command has to happen before we start drawing
         arcade.start_render()
 
+        # Draw background
         arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
 
         # Draw all the sprites.
         self.wall_list.draw()
         self.house_list.draw()
-        self.player_sprite_list.draw()
         self.viper_sprite_list.draw()
         self.purple_snake_list.draw()
         self.green_snake_list.draw()
+        self.player_sprite_list.draw()
         self.InstructToFindViper()
 
     def on_update(self, delta_time):
@@ -239,15 +270,27 @@ class GameIntro(arcade.View):
         if self.player_sprite.top > 735:
             self.player_sprite.change_y = 0
 
-        # Check if Sssam hits house
-        house_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.house_list)
-        if len(house_hit_list) > 0:
-            self.player_sprite.change_x *= -1
-            self.player_sprite.change_y *= -1
+        for self.house in self.house_list:
+            # Check if Sssam hits house
+            house_hit_list = arcade.check_for_collision_with_list(self.house, self.player_sprite_list)
+
+            if len(house_hit_list) > 0:
+                self.player_sprite.change_x *= -1
+                self.player_sprite.change_y *= -1
+
+            """for Sssam in house_hit_list:
+                if Sssam.change_x != 0:
+                    Sssam.change_x = 0
+                if Sssam.change_y != 0:
+                    Sssam.change_y = 0
+                if Sssam.change_x != 0 and Sssam.change_y != 0:
+                    Sssam.change_x = 0
+                    Sssam.change_y = 0"""
 
         # Sssam collision with Viper
         viper_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.viper_sprite_list)
-        # for Sssam in viper_snake_hit_list:
+
+        # When Sssam runs into Viper
         if len(viper_snake_hit_list) > 0:
             self.player_sprite.center_x = 360
             self.player_sprite.change_y = 270
@@ -331,7 +374,7 @@ class GameIntro(arcade.View):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class TalkToViper1(arcade.View):
-
+    """Load switch view to talking to Viper 1"""
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk1.png")
@@ -348,7 +391,7 @@ class TalkToViper1(arcade.View):
         self.texture.draw_sized(370, 265, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
-        """If the user presses the mouse button, close the game"""
+        """If the user presses the mouse button, next view"""
         ttv2 = TalkToViper2()
         self.window.show_view(ttv2)
 
@@ -356,7 +399,7 @@ class TalkToViper1(arcade.View):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class TalkToViper2(arcade.View):
-
+    """Switch view to talking to Viper 2"""
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk2.png")
@@ -373,7 +416,7 @@ class TalkToViper2(arcade.View):
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
-        """If the user presses the mouse button, close the game"""
+        """If the user presses the mouse button, next view"""
         ttv3 = TalkToViper3()
         self.window.show_view(ttv3)
 
@@ -382,7 +425,7 @@ class TalkToViper2(arcade.View):
 
 
 class TalkToViper3(arcade.View):
-
+    """Switch view to talking to Viper 3"""
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk3.png")
@@ -399,7 +442,7 @@ class TalkToViper3(arcade.View):
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
-        """If the user presses the mouse button, close the game"""
+        """If the user presses the mouse button, begin the game"""
         game_view = GameView()
         game_view.setupIsland()
         self.window.show_view(game_view)
@@ -410,7 +453,7 @@ class TalkToViper3(arcade.View):
 
 class GameView(arcade.View):
     """
-    Main application class.
+    Main Game Class.
     """
 
     def __init__(self):
@@ -478,7 +521,7 @@ class GameView(arcade.View):
         self.view_bottom = 0
         self.view_left = 0
 
-        # self.player_sprite = Player()
+        # self.player_sprite = Sssam
         self.player_sprite = arcade.Sprite("images/Sssam.png", SPRITE_SCALING)
         self.player_sprite.center_x = 1120
         self.player_sprite.center_y = 255
@@ -495,30 +538,6 @@ class GameView(arcade.View):
         self.cityHall.center_x = 335
         self.cityHall.center_y = 350
         self.house_list.append(self.cityHall)
-
-        for i in range(PURPLE_POP):
-            self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.psnake.center_x = random.randrange(110, 820)
-            self.psnake.center_y = random.randrange(120, 710)
-            # Add the snake to the lists
-            self.purple_snake_list.append(self.psnake)
-
-        for i in range(GREEN_POP - 5):
-            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.gsnake.center_x = random.randrange(830, 1000)
-            self.gsnake.center_y = random.randrange(300, 710)
-            # Add the snake to the lists
-            self.green_snake_list.append(self.gsnake)
-
-        for i in range(GREEN_POP - 10):
-            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
-            # Position the snake
-            self.gsnake.center_x = random.randrange(830, 1000)
-            self.gsnake.center_y = random.randrange(120, 300)
-            # Add the snake to the lists
-            self.green_snake_list.append(self.gsnake)
 
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
@@ -584,6 +603,59 @@ class GameView(arcade.View):
         self.house.center_x = 1060
         self.house.center_y = 660
         self.house_list.append(self.house)
+
+        # Place green snakes
+        for i in range(GREEN_POP):
+            self.gsnake = arcade.Sprite("images/GreenSnake.png", SPRITE_SCALING)
+            # Boolean variable if we successfully placed the coin
+            gsnake_placed_successfully = False
+
+            # Keep trying until success
+            while not gsnake_placed_successfully:
+                # Position the gsnake
+                self.gsnake.center_x = random.randrange(830, 1150)
+                self.gsnake.center_y = random.randrange(120, 710)
+
+                # See if the gsnake is hitting a house
+                wall_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.house_list)
+
+                # See if the gsnake is hitting another gsnake
+                gsnake_hit_list = arcade.check_for_collision_with_list(self.gsnake, self.green_snake_list)
+
+                if len(wall_hit_list) == 0 and len(gsnake_hit_list) == 0:
+                    gsnake_placed_successfully = True
+
+            # Add the coin to the lists
+            self.green_snake_list.append(self.gsnake)
+
+        # Place purple snakes
+        for i in range(PURPLE_POP):
+            self.psnake = arcade.Sprite("images/PurpleSnake.png", SPRITE_SCALING)
+            # Boolean variable if we successfully placed the coin
+            psnake_placed_successfully = False
+
+            # Keep trying until success
+            while not psnake_placed_successfully:
+                # Position the gsnake
+                self.psnake.center_x = random.randrange(100, 750)
+                self.psnake.center_y = random.randrange(120, 710)
+
+                # See if the psnake is hitting Viper
+                viper_hit_list = arcade.check_for_collision_with_list(self.psnake, self.viper_sprite_list)
+
+                # See if the gsnake is hitting a house
+                wall_hit_list = arcade.check_for_collision_with_list(self.psnake, self.house_list)
+
+                # See if the gsnake is hitting another gsnake
+                psnake_hit_list = arcade.check_for_collision_with_list(self.psnake, self.purple_snake_list)
+
+                if len(wall_hit_list) == 0:
+                    if len(psnake_hit_list) == 0:
+                        if len(viper_hit_list) == 0:
+                            psnake_placed_successfully = True
+
+            # Add the coin to the lists
+            self.purple_snake_list.append(self.psnake)
 
     def on_draw(self):
         """
@@ -653,16 +725,17 @@ class GameView(arcade.View):
             self.viper_sprite.change_x *= -1
             self.viper_sprite.change_y *= -1
 
+        # Call follow_viper() for all of the psnakes in the purple_snake_list
+        for self.psnake in self.purple_snake_list:
+            self.follow_viper(self.psnake)
+
         # Check if psnake hits house
         """for self.psnake in self.purple_snake_list:
             psnake_house_hit_list = arcade.check_for_collision_with_list(self.psnake, self.house_list)
             if len(psnake_house_hit_list) > 0:
                 self.psnake.change_x *= -1
-                self.psnake.change_y *= -1"""
-
-        # Call follow_viper() for all of the psnakes in the purple_snake_list
-        for self.psnake in self.purple_snake_list:
-            self.follow_viper(self.psnake)
+                self.psnake.change_y *= -1
+                self.follow_viper(self.psnake)"""
 
         # Sssam collision with purple snakes
         purple_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.purple_snake_list)
@@ -834,21 +907,6 @@ class TitleView(arcade.View):
 
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        """arcade.draw_text("Welcome to the Island of Python", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
-                         arcade.color.WHITE, font_size=50, anchor_x='center')
-        arcade.draw_text("~ We're having an election for mayor!", 300, SCREEN_HEIGHT / 2-75, arcade.color.WHITE,
-                         font_size=20, anchor_x='left')
-        arcade.draw_text("~ The Island of Python is comprised of two different snakes: purple and green", 300,
-                         SCREEN_HEIGHT / 2-105, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ You, a green snake named Sssam, have been nominated to run", 300, SCREEN_HEIGHT / 2-135,
-                         arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ You fear that it will be more difficult to win against the current purple mayor, Viper",
-                         300, SCREEN_HEIGHT / 2-165, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ After all, purple snakes run the Island...", 300, SCREEN_HEIGHT / 2-195, arcade.color.WHITE,
-                         font_size=20, anchor_x='left')
-        arcade.draw_text('Click to advance', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2-250, arcade.color.WHITE, font_size=20,
-                         anchor_x='center')"""
-
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
         instruct = InstructionView()
@@ -873,20 +931,6 @@ class InstructionView(arcade.View):
         """Draw this view"""
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
-        """arcade.draw_text("INSTRUCTIONS", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
-                         arcade.color.WHITE, font_size=50, anchor_x='center')
-        arcade.draw_text("~ You will be competing to wins votes against the incumbent, Viper  ", 300,
-                         SCREEN_HEIGHT / 2 - 75, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ Naturally, the purple snakes will favor Viper and want to give them their vote", 300,
-                         SCREEN_HEIGHT / 2 - 105, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ Your job is to gain the majority of votes before all the votes are cast", 300,
-                         SCREEN_HEIGHT / 2 - 135, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ Use your keyboard arrows to move Sssam", 300,
-                         SCREEN_HEIGHT / 2 - 165, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text("~ Good luck!",
-                         300, SCREEN_HEIGHT / 2 - 195, arcade.color.WHITE, font_size=20, anchor_x='left')
-        arcade.draw_text('Click to Start the Election', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 250, arcade.color.WHITE,
-                         font_size=20, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
@@ -913,10 +957,6 @@ class GameOverWinView(arcade.View):
         """Draw this view"""
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
-        """arcade.draw_text("Game Over! You've Won the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
-                         arcade.color.WHITE, font_size=50, anchor_x='center')
-        arcade.draw_text("You received at least 23 votes!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 105,
-                         arcade.color.WHITE, font_size=40, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
