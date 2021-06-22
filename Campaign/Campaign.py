@@ -1,22 +1,27 @@
 import random
 import arcade
 
+# Scaling for sprites
 SPRITE_SCALING = 1.5
 SPRITE_SCALING_BOX = 0.175
 HOUSE_SCALE = 0.12
 
+# Screen sizing and title
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 800
 SCREEN_TITLE = "The Campaign"
 
+# Movement speeds for sprites
 MOVEMENT_SPEED = 2
 PURPLE_SPEED = 0.3
 
+# Viewpoint margins for scrolling
 LEFT_VIEWPORT_MARGIN = SCREEN_WIDTH / 2
 RIGHT_VIEWPORT_MARGIN = SCREEN_WIDTH / 2
 BOTTOM_VIEWPORT_MARGIN = SCREEN_HEIGHT / 2
 TOP_VIEWPORT_MARGIN = SCREEN_HEIGHT / 2
 
+# Populations for snakes
 PURPLE_POP = 30
 GREEN_POP = 15
 
@@ -252,6 +257,7 @@ class GameIntro(arcade.View):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
+
         self.player_sprite_list.update()
         self.viper_sprite_list.update()
         self.purple_snake_list.update()
@@ -367,23 +373,27 @@ class GameIntro(arcade.View):
 
 class TalkToViper1(arcade.View):
     """Load switch view to talking to Viper 1"""
+
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk1.png")
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.GREEN)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(370, 265, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, next view"""
+
         ttv2 = TalkToViper2()
         self.window.show_view(ttv2)
 
@@ -392,23 +402,27 @@ class TalkToViper1(arcade.View):
 
 class TalkToViper2(arcade.View):
     """Switch view to talking to Viper 2"""
+
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk2.png")
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.GREEN)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, next view"""
+
         ttv3 = TalkToViper3()
         self.window.show_view(ttv3)
 
@@ -418,23 +432,27 @@ class TalkToViper2(arcade.View):
 
 class TalkToViper3(arcade.View):
     """Switch view to talking to Viper 3"""
+
     def __init__(self):
         super().__init__()
         self.texture = arcade.load_texture("images/vTalk3.png")
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.GREEN)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, begin the game"""
+
         game_view = GameView()
         game_view.setupIsland()
         self.window.show_view(game_view)
@@ -515,6 +533,7 @@ class GameView(arcade.View):
         self.player_sprite.center_y = 255
         self.player_sprite_list.append(self.player_sprite)
 
+        # Set up Viper
         self.viper_sprite = arcade.Sprite("images/Viper.png", SPRITE_SCALING)
         self.viper_sprite.center_x = 360
         self.viper_sprite.center_y = 270
@@ -522,11 +541,13 @@ class GameView(arcade.View):
         self.viper_sprite.change_y = random.random()
         self.viper_sprite_list.append(self.viper_sprite)
 
+        # Set up City Hall
         self.cityHall = arcade.Sprite("images/cityhall.png", SPRITE_SCALING_BOX)
         self.cityHall.center_x = 335
         self.cityHall.center_y = 350
         self.house_list.append(self.cityHall)
 
+        # Set up House
         self.house = arcade.Sprite("images/house.png", HOUSE_SCALE)
         self.house.center_x = 550
         self.house.center_y = 300
@@ -666,6 +687,7 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
+
         self.player_sprite_list.update()
         self.viper_sprite_list.update()
         self.purple_snake_list.update()
@@ -790,6 +812,7 @@ class GameView(arcade.View):
         self.scoreboard()
 
     def follow_viper(self, psnake):
+        """Used to move purple snakes towards Viper"""
 
         if psnake.center_y < self.viper_sprite.center_y:
             psnake.center_y += min(PURPLE_SPEED, self.viper_sprite.center_y - psnake.center_y)
@@ -869,6 +892,7 @@ class GameView(arcade.View):
 
 
 class TitleView(arcade.View):
+    """Display Title Screen"""
 
     def __init__(self):
         super().__init__()
@@ -876,6 +900,7 @@ class TitleView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
@@ -889,6 +914,7 @@ class TitleView(arcade.View):
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
+
         instruct = InstructionView()
         self.window.show_view(instruct)
 
@@ -896,6 +922,7 @@ class TitleView(arcade.View):
 
 
 class InstructionView(arcade.View):
+    """Display Instruction Screen"""
 
     def __init__(self):
         super().__init__()
@@ -903,17 +930,20 @@ class InstructionView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.SEA_GREEN)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, start the game"""
+
         game_view = GameIntro()
         game_view.setupIsland()
         self.window.show_view(game_view)
@@ -922,6 +952,7 @@ class InstructionView(arcade.View):
 # ----------------------------------------------------------------------------------------------------------------------
 
 class GameOverWinView(arcade.View):
+    """Display Winner Screen"""
 
     def __init__(self):
         super().__init__()
@@ -929,22 +960,26 @@ class GameOverWinView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.GREEN)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
+
         arcade.close_window()
 # ----------------------------------------------------------------------------------------------------------------------
 
 
 class GameOverLoseView(arcade.View):
+    """Display Loser Screen"""
 
     def __init__(self):
         super().__init__()
@@ -952,17 +987,20 @@ class GameOverLoseView(arcade.View):
 
     def on_show(self):
         """Runs once we switch to this view"""
+
         arcade.set_background_color(arcade.csscolor.MEDIUM_PURPLE)
         # Reset viewpoint back to 0,0
         arcade.set_viewport(0, SCREEN_WIDTH - 1, 0, SCREEN_HEIGHT - 1)
 
     def on_draw(self):
         """Draw this view"""
+
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
+
         arcade.close_window()
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -970,6 +1008,7 @@ class GameOverLoseView(arcade.View):
 
 def main():
     """ Main method """
+
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     start_view = TitleView()
     window.show_view(start_view)
