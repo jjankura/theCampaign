@@ -270,6 +270,7 @@ class GameIntro(arcade.View):
         if self.player_sprite.top > 735:
             self.player_sprite.change_y = 0
 
+        # Sssam hitting house
         for self.house in self.house_list:
             # Check if Sssam hits house
             house_hit_list = arcade.check_for_collision_with_list(self.house, self.player_sprite_list)
@@ -277,15 +278,6 @@ class GameIntro(arcade.View):
             if len(house_hit_list) > 0:
                 self.player_sprite.change_x *= -1
                 self.player_sprite.change_y *= -1
-
-            """for Sssam in house_hit_list:
-                if Sssam.change_x != 0:
-                    Sssam.change_x = 0
-                if Sssam.change_y != 0:
-                    Sssam.change_y = 0
-                if Sssam.change_x != 0 and Sssam.change_y != 0:
-                    Sssam.change_x = 0
-                    Sssam.change_y = 0"""
 
         # Sssam collision with Viper
         viper_snake_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.viper_sprite_list)
@@ -968,10 +960,6 @@ class GameOverLoseView(arcade.View):
         """Draw this view"""
         arcade.start_render()
         self.texture.draw_sized(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT)
-        """arcade.draw_text("Game Over! You've Lost the Election!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50,
-                         arcade.color.WHITE, font_size=50, anchor_x='center')
-        arcade.draw_text("Viper won the election with 23 votes", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 105,
-                         arcade.color.WHITE, font_size=40, anchor_x='center')"""
 
     def on_mouse_press(self, _x, _y, button, _modifiers):
         """If the user presses the mouse button, close the game"""
